@@ -1,0 +1,36 @@
+{
+  "name": "debugerror",
+  "version": "1.0.1",
+  "description": "Explains common programming errors with causes and fixes — no internet required.",
+  "main": "index.js",
+  "bin": {
+    "debugError": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "cli",
+    "error",
+    "debug",
+    "explain",
+    "programming",
+    "helper",
+    "programmer",
+    "developer",
+    "code",
+    "development",
+    "tools",
+    "fix",
+    "fix-error",
+    "explain-error",
+    "help",
+    "developer-tool"
+  ],
+  "author": "Saif Gawdat",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0"
+  }
+}
