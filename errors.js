@@ -24,7 +24,14 @@ const ERROR_DB = [
       "Provide a default fallback: `const x = data ?? {}`",
       "Add `console.log()` before the error line to inspect the actual value",
     ],
-    keywords: ["undefined", "read", "properties", "null", "variable", "missing"],
+    keywords: [
+      "undefined",
+      "read",
+      "properties",
+      "null",
+      "variable",
+      "missing",
+    ],
   },
 
   {
@@ -142,7 +149,14 @@ const ERROR_DB = [
       "Run the file through a linter (ESLint) to get a precise report",
       "Ensure your Node.js version supports the syntax you are using",
     ],
-    keywords: ["syntax", "token", "unexpected", "bracket", "parentheses", "parse"],
+    keywords: [
+      "syntax",
+      "token",
+      "unexpected",
+      "bracket",
+      "parentheses",
+      "parse",
+    ],
   },
 
   {
@@ -420,7 +434,14 @@ const ERROR_DB = [
       "Ensure you are requesting the correct resource ID",
       "Contact the administrator if you believe you should have access",
     ],
-    keywords: ["forbidden", "permission", "permissions", "access", "403", "role"],
+    keywords: [
+      "forbidden",
+      "permission",
+      "permissions",
+      "access",
+      "403",
+      "role",
+    ],
   },
 
   {
@@ -438,7 +459,15 @@ const ERROR_DB = [
       "Change the port to something above 1024 (e.g., 3000, 8080)",
       "Check file permissions with `ls -l` and change them with `chmod` or `chown`",
     ],
-    keywords: ["eacces", "permission", "permissions", "denied", "access", "sudo", "port"],
+    keywords: [
+      "eacces",
+      "permission",
+      "permissions",
+      "denied",
+      "access",
+      "sudo",
+      "port",
+    ],
   },
 
   {
@@ -456,7 +485,14 @@ const ERROR_DB = [
       "Double-check the host and port in your configuration",
       "Verify that the service is listening on `0.0.0.0` or `127.0.0.1` as expected",
     ],
-    keywords: ["connection", "refused", "econnrefused", "offline", "server", "port"],
+    keywords: [
+      "connection",
+      "refused",
+      "econnrefused",
+      "offline",
+      "server",
+      "port",
+    ],
   },
 
   // ─── React ────────────────────────────────────────────────────────────────
@@ -517,7 +553,8 @@ const ERROR_DB = [
   },
 
   {
-    title: "React: Cannot update a component while rendering a different component",
+    title:
+      "React: Cannot update a component while rendering a different component",
     match: /cannot update a component.+while rendering a different component/i,
     explanation:
       "A state update (setState / useState setter) was triggered during the render phase of another component. React doesn't allow side effects during rendering.",
@@ -588,7 +625,8 @@ const ERROR_DB = [
   // ─── Next.js ──────────────────────────────────────────────────────────────
 
   {
-    title: "Next.js: You're importing a component that needs useState (Client Component)",
+    title:
+      "Next.js: You're importing a component that needs useState (Client Component)",
     match: /you('re| are) importing a component that needs (usestate|client)/i,
     explanation:
       "In Next.js App Router, components are Server Components by default. If you use React hooks (useState, useEffect, etc.) you must mark the file as a Client Component by adding 'use client' at the very top.",
@@ -606,7 +644,8 @@ const ERROR_DB = [
 
   {
     title: "Next.js: next/headers called outside Server Component",
-    match: /next\/headers.+outside.*server|was called outside a server component/i,
+    match:
+      /next\/headers.+outside.*server|was called outside a server component/i,
     explanation:
       "`cookies()`, `headers()`, and other functions from `next/headers` are only available inside Server Components or Route Handlers. They cannot be used in Client Components.",
     causes: [
@@ -634,7 +673,7 @@ const ERROR_DB = [
     fixes: [
       "Double-check the import path against the actual file location",
       "Run `npm install` to ensure all packages are present",
-      "Add your alias to `tsconfig.json`: `{ \"paths\": { \"@/*\": [\"./src/*\"] } }`",
+      'Add your alias to `tsconfig.json`: `{ "paths": { "@/*": ["./src/*"] } }`',
       "Match import casing exactly to the filename on disk",
     ],
   },
@@ -657,7 +696,8 @@ const ERROR_DB = [
 
   {
     title: "Next.js: useRouter called on the server / next/navigation error",
-    match: /userouter.*server|invariant.*router.*not.*mounted|next\/navigation.*server/i,
+    match:
+      /userouter.*server|invariant.*router.*not.*mounted|next\/navigation.*server/i,
     explanation:
       "`useRouter` from `next/navigation` (App Router) or `next/router` (Pages Router) is a client-side hook. It cannot be called in Server Components.",
     causes: [
@@ -779,6 +819,323 @@ const ERROR_DB = [
       "Issue a new token if the old one is expired (implement a refresh token flow)",
       "Check that the `algorithm` option matches in both `jwt.sign()` and `jwt.verify()`",
     ],
+  },
+  // ─── TypeScript Advanced ───────────────────────────────────────────────
+
+  {
+    title: "TypeScript: Property does not exist on type",
+    match: /property '.+' does not exist on type/i,
+    explanation:
+      "You are trying to access a property that TypeScript does not recognise on the given type. The object shape does not match your expectation.",
+    causes: [
+      "Incorrect type definition",
+      "Using a union type without narrowing",
+      "Typo in property name",
+      "API response shape mismatch",
+    ],
+    fixes: [
+      "Check the interface/type definition",
+      "Use type narrowing (if / in / typeof)",
+      "Ensure the property exists on all union members",
+      "Log the actual object to verify structure",
+    ],
+  },
+
+  {
+    title: "TypeScript: Object is possibly undefined",
+    match: /object is possibly 'undefined'/i,
+    explanation:
+      "TypeScript warns that a variable may be undefined at runtime, so accessing it is unsafe.",
+    causes: [
+      "Optional chaining not used",
+      "Missing null/undefined checks",
+      "Async data not loaded yet",
+    ],
+    fixes: [
+      "Use optional chaining: obj?.prop",
+      "Add guards: if (!obj) return",
+      "Use non-null assertion carefully: obj!.prop",
+    ],
+  },
+
+  // ─── Node.js / Backend ───────────────────────────────────────────────
+
+  {
+    title: "ERR_HTTP_HEADERS_SENT",
+    match: /err_http_headers_sent/i,
+    explanation:
+      "Headers were already sent to the client, and the server attempted to modify them again.",
+    causes: [
+      "Multiple res.send/res.json calls",
+      "Async logic sending response twice",
+    ],
+    fixes: [
+      "Ensure only one response is sent",
+      "Return immediately after sending response",
+    ],
+  },
+
+  {
+    title: "ERR_REQUIRE_ESM",
+    match: /err_require_esm/i,
+    explanation:
+      "You are trying to require() an ES module using CommonJS syntax.",
+    causes: ["Using require() with ESM package", "Mixing module systems"],
+    fixes: [
+      "Use import instead of require",
+      'Set "type": "module" in package.json',
+      "Use dynamic import()",
+    ],
+  },
+
+  {
+    title: "ERR_MODULE_NOT_FOUND",
+    match: /err_module_not_found/i,
+    explanation: "Node.js could not resolve an ES module import.",
+    causes: [
+      "Wrong file extension",
+      "Missing .js in import path",
+      "Incorrect relative path",
+    ],
+    fixes: ["Add file extension in import", "Check path correctness"],
+  },
+
+  // ─── Database ───────────────────────────────────────────────
+
+  {
+    title: "MongoError: E11000 duplicate key",
+    match: /e11000 duplicate key/i,
+    explanation:
+      "MongoDB rejected the insert/update because it violates a unique index constraint.",
+    causes: ["Duplicate value for unique field", "User already exists"],
+    fixes: [
+      "Check for existing record before insert",
+      "Handle error and return proper response",
+    ],
+  },
+
+  {
+    title: "Prisma: Unique constraint failed",
+    match: /unique constraint failed/i,
+    explanation:
+      "Prisma tried to insert or update a record that violates a unique constraint in the database.",
+    causes: ["Duplicate email/username", "Incorrect unique field handling"],
+    fixes: [
+      "Validate uniqueness before insert",
+      "Catch error and show user-friendly message",
+    ],
+  },
+
+  // ─── Networking / Fetch ───────────────────────────────────────────────
+
+  {
+    title: "FetchError: network error",
+    match: /fetcherror|network error/i,
+    explanation:
+      "The request failed due to network issues before reaching the server.",
+    causes: ["No internet connection", "DNS failure", "Server down"],
+    fixes: [
+      "Check internet connection",
+      "Retry request",
+      "Add timeout + retry logic",
+    ],
+  },
+
+  {
+    title: "CORS: Preflight failed",
+    match: /preflight.*failed/i,
+    explanation:
+      "The browser blocked the request because the preflight OPTIONS request failed.",
+    causes: ["Server not handling OPTIONS", "Missing CORS headers"],
+    fixes: ["Enable OPTIONS handling", "Use cors middleware properly"],
+  },
+
+  // ─── React Advanced ───────────────────────────────────────────────
+
+  {
+    title: "React: setState on unmounted component",
+    match: /can't perform a react state update on an unmounted component/i,
+    explanation:
+      "A state update was triggered after the component was unmounted.",
+    causes: [
+      "Async request finished after unmount",
+      "Missing cleanup in useEffect",
+    ],
+    fixes: ["Cancel async tasks in cleanup", "Track mounted state"],
+  },
+
+  {
+    title: "React: Controlled vs uncontrolled input",
+    match: /a component is changing an uncontrolled input/i,
+    explanation: "An input switched between controlled and uncontrolled state.",
+    causes: [
+      "value changes from undefined to defined",
+      "Missing initial state",
+    ],
+    fixes: ["Initialize state properly", "Ensure value is always defined"],
+  },
+
+  // ─── Build Tools ───────────────────────────────────────────────
+
+  {
+    title: "Vite: Failed to resolve import",
+    match: /failed to resolve import/i,
+    explanation: "Vite could not resolve an imported module.",
+    causes: ["Wrong path", "Missing dependency"],
+    fixes: ["Check import path", "Install dependency"],
+  },
+
+  {
+    title: "Webpack: Module parse failed",
+    match: /module parse failed/i,
+    explanation: "Webpack encountered syntax it cannot parse without a loader.",
+    causes: ["Missing loader (babel, ts-loader)", "Unsupported syntax"],
+    fixes: ["Install proper loader", "Update webpack config"],
+  }, // ─── Next.js Advanced ───────────────────────────────────────────────
+
+  {
+    title: "Next.js: Dynamic server usage error",
+    match: /dynamic server usage/i,
+    explanation:
+      "Next.js detected usage of dynamic data (cookies, headers) in a static context.",
+    causes: [
+      "Using cookies() in static page",
+      "Mixing static and dynamic rendering",
+    ],
+    fixes: [
+      "Mark route as dynamic: export const dynamic = 'force-dynamic'",
+      "Move logic to server component",
+    ],
+    keywords: ["nextjs", "dynamic"],
+  },
+
+  {
+    title: "Next.js: Middleware infinite loop",
+    match: /middleware.*loop/i,
+    explanation: "Middleware keeps redirecting causing infinite loop.",
+    causes: ["Redirect condition always true", "Missing path check"],
+    fixes: ["Add condition to stop redirect", "Check pathname before redirect"],
+    keywords: ["nextjs", "middleware"],
+  },
+
+  // ─── Authentication / Security ───────────────────────────────────────────────
+
+  {
+    title: "Auth: Invalid CSRF token",
+    match: /csrf token/i,
+    explanation: "Request rejected due to invalid or missing CSRF token.",
+    causes: ["Token expired", "Token not sent"],
+    fixes: ["Regenerate token", "Include token in request"],
+    keywords: ["auth", "csrf"],
+  },
+
+  {
+    title: "Auth: Session expired",
+    match: /session expired/i,
+    explanation: "User session is no longer valid.",
+    causes: ["Token expired", "User logged out"],
+    fixes: ["Re-login user", "Refresh token"],
+    keywords: ["auth"],
+  },
+
+  // ─── SQL / Databases ───────────────────────────────────────────────
+
+  {
+    title: "SQL: Syntax error",
+    match: /sql syntax.*error/i,
+    explanation: "Database query contains invalid SQL syntax.",
+    causes: ["Missing comma", "Wrong keyword"],
+    fixes: ["Check query syntax", "Test in DB client"],
+    keywords: ["sql"],
+  },
+
+  {
+    title: "SQL: Connection timeout",
+    match: /connection timeout/i,
+    explanation: "Database connection took too long.",
+    causes: ["DB down", "Network slow"],
+    fixes: ["Check DB status", "Increase timeout"],
+    keywords: ["sql"],
+  },
+
+  // ─── Docker ───────────────────────────────────────────────
+
+  {
+    title: "Docker: Container exited with code 1",
+    match: /exited with code 1/i,
+    explanation: "Container crashed due to runtime error.",
+    causes: ["App crash", "Missing env variables"],
+    fixes: ["Check logs: docker logs", "Fix app error"],
+    keywords: ["docker"],
+  },
+
+  {
+    title: "Docker: Port already allocated",
+    match: /port is already allocated/i,
+    explanation: "Docker cannot bind port because it's already used.",
+    causes: ["Another container running"],
+    fixes: ["Stop container", "Change port"],
+    keywords: ["docker"],
+  },
+
+  // ─── Git ───────────────────────────────────────────────
+
+  {
+    title: "Git: Merge conflict",
+    match: /merge conflict/i,
+    explanation: "Git cannot automatically merge changes.",
+    causes: ["Same lines modified"],
+    fixes: ["Resolve conflict manually", "Commit after resolving"],
+    keywords: ["git"],
+  },
+
+  {
+    title: "Git: Detached HEAD",
+    match: /detached head/i,
+    explanation: "You are not on a branch.",
+    causes: ["Checked out commit directly"],
+    fixes: ["Create new branch"],
+    keywords: ["git"],
+  },
+
+  // ─── Browser / DOM ───────────────────────────────────────────────
+
+  {
+    title: "DOMException: Failed to execute",
+    match: /domexception/i,
+    explanation: "Browser failed to execute DOM operation.",
+    causes: ["Invalid DOM operation", "Wrong element type"],
+    fixes: ["Check DOM API usage"],
+    keywords: ["browser"],
+  },
+
+  {
+    title: "ResizeObserver loop limit exceeded",
+    match: /resizeobserver loop/i,
+    explanation: "Too many layout recalculations triggered.",
+    causes: ["Infinite resize loop"],
+    fixes: ["Debounce resize"],
+    keywords: ["browser"],
+  },
+
+  // ─── Performance ───────────────────────────────────────────────
+
+  {
+    title: "Memory leak detected",
+    match: /memory leak/i,
+    explanation: "Application is consuming memory without releasing it.",
+    causes: ["Uncleared intervals", "Event listeners not removed"],
+    fixes: ["Cleanup listeners", "Use useEffect cleanup"],
+    keywords: ["performance"],
+  },
+
+  {
+    title: "Long task warning",
+    match: /long task/i,
+    explanation: "Main thread blocked for too long.",
+    causes: ["Heavy computation"],
+    fixes: ["Use web workers", "Optimize code"],
+    keywords: ["performance"],
   },
 ];
 
