@@ -24,6 +24,7 @@ const ERROR_DB = [
       "Provide a default fallback: `const x = data ?? {}`",
       "Add `console.log()` before the error line to inspect the actual value",
     ],
+    keywords: ["undefined", "read", "properties", "null", "variable", "missing"],
   },
 
   {
@@ -42,6 +43,7 @@ const ERROR_DB = [
       "Use nullish coalescing: `const val = result ?? defaultValue`",
       "Verify the element ID or API path is correct",
     ],
+    keywords: ["null", "read", "properties", "undefined", "missing", "object"],
   },
 
   {
@@ -84,6 +86,45 @@ const ERROR_DB = [
   },
 
   {
+    title: "TypeScript: Unexpected any",
+    match: /unexpected any/i,
+    explanation:
+      "A value was assigned the `any` type, which disables TypeScript's type checking for that variable. This often triggers a linting error (like `@typescript-eslint/no-explicit-any`).",
+    causes: [
+      "Explicitly using the `: any` type annotation",
+      "Using a library that doesn't provide types, causing variables to default to `any`",
+      "Assigning the result of `JSON.parse()` to a variable without a type",
+    ],
+    fixes: [
+      "Define a proper interface or type for the variable",
+      "Use `unknown` if the type is truly unknown, and narrow it later",
+      "If using a third-party library, install its `@types` package",
+      "Use a type assertion `as SpecificType` if you are certain of the shape",
+    ],
+    keywords: ["typescript", "any", "unexpected", "lint", "type"],
+  },
+
+  {
+    title: "TypeScript: Type is not assignable to type",
+    match: /type '.+' is not assignable to type '.+'/i,
+    explanation:
+      "TypeScript's static analysis detected that you are trying to assign a value of one type to a variable or property that expects a different, incompatible type.",
+    causes: [
+      "Passing a string to a function that expects a number",
+      "Missing a required property in an object literal",
+      "A typo in an object property name",
+      "An API response shape changed and no longer matches your interface",
+    ],
+    fixes: [
+      "Check the target type's definition and ensure your value matches it",
+      "Add the missing properties to your object",
+      "Use a type guard or `is` keyword to narrow the type before assignment",
+      "Cast the value if you are sure it is compatible: `value as TargetType`",
+    ],
+    keywords: ["typescript", "assignable", "type", "mismatch", "incompatible"],
+  },
+
+  {
     title: "SyntaxError: Unexpected token",
     match: /syntaxerror: unexpected token/i,
     explanation:
@@ -101,6 +142,7 @@ const ERROR_DB = [
       "Run the file through a linter (ESLint) to get a precise report",
       "Ensure your Node.js version supports the syntax you are using",
     ],
+    keywords: ["syntax", "token", "unexpected", "bracket", "parentheses", "parse"],
   },
 
   {
@@ -120,6 +162,7 @@ const ERROR_DB = [
       "Add a `console.log()` near the recursive call to trace the depth",
       "Check that setters do not call themselves (use the backing field instead)",
     ],
+    keywords: ["stack", "recursion", "recursive", "overflow", "range", "call"],
   },
 
   {
@@ -307,6 +350,113 @@ const ERROR_DB = [
       "Check the return value of the function before assigning to its result",
       "Ensure array indices are within bounds before writing to them",
     ],
+  },
+
+  {
+    title: "Unexpected Error",
+    match: /unexpected error|unknown error|an error occurred/i,
+    explanation:
+      "A generic error caught by the system when a more specific error message wasn't available. This is often a 'fallback' for unhandled exceptions.",
+    causes: [
+      "An unhandled exception in an async block",
+      "A third-party library throwing an error without a descriptive message",
+      "The code reached a state that the developer didn't anticipate",
+    ],
+    fixes: [
+      "Check the full stack trace (if available) to find the source",
+      "Add more granular `try/catch` blocks to identify the specific failing line",
+      "Log the entire error object: `console.error(err)` to see hidden properties",
+    ],
+  },
+
+  {
+    title: "HTTP 500: Internal Server Error",
+    match: /500 internal server error|status code 500/i,
+    explanation:
+      "The server encountered an unexpected condition that prevented it from fulfilling the request. This is a generic 'catch-all' for server-side crashes.",
+    causes: [
+      "A crash in the backend code (null pointer, uncaught exception)",
+      "Database connection failure or timeout",
+      "A misconfiguration in the web server (e.g., Nginx, Apache)",
+    ],
+    fixes: [
+      "Check the server-side logs for a more specific error message",
+      "Verify that the database and other microservices are running",
+      "Check for recent code changes that might have introduced a regression",
+    ],
+    keywords: ["server", "error", "internal", "crash", "500", "backend"],
+  },
+
+  {
+    title: "HTTP 401: Unauthorized",
+    match: /401 unauthorized|status code 401/i,
+    explanation:
+      "The request requires user authentication. The client must provide a valid credential (like a JWT or session cookie) to access the resource.",
+    causes: [
+      "Missing `Authorization` header",
+      "The token has expired or is invalid",
+      "The user has been logged out",
+    ],
+    fixes: [
+      "Ensure you are sending a valid token in the headers",
+      "Check if the user needs to log in again",
+      "Verify the token secret matches on both client and server",
+    ],
+    keywords: ["unauthorized", "auth", "token", "login", "401", "jwt"],
+  },
+
+  {
+    title: "HTTP 403: Forbidden",
+    match: /403 forbidden|status code 403/i,
+    explanation:
+      "The server understood the request but refuses to authorize it. Unlike 401, the client's identity is known, but they don't have permission for this specific resource.",
+    causes: [
+      "User role does not have sufficient permissions",
+      "Attempting to access a resource that belongs to another user",
+      "The IP address is blocked by a firewall or WAF",
+    ],
+    fixes: [
+      "Check your account permissions / role",
+      "Ensure you are requesting the correct resource ID",
+      "Contact the administrator if you believe you should have access",
+    ],
+    keywords: ["forbidden", "permission", "permissions", "access", "403", "role"],
+  },
+
+  {
+    title: "EACCES: Permission denied",
+    match: /eacces: permission denied|permission denied/i,
+    explanation:
+      "The process attempted to perform a file or network operation that it does not have permission for. Common when writing to protected folders or binding to low ports.",
+    causes: [
+      "Trying to use a port below 1024 without root/admin privileges",
+      "Writing to a directory owned by another user or `root`",
+      "A file is currently locked by another process",
+    ],
+    fixes: [
+      "Run the command with `sudo` or as an Administrator (if safe)",
+      "Change the port to something above 1024 (e.g., 3000, 8080)",
+      "Check file permissions with `ls -l` and change them with `chmod` or `chown`",
+    ],
+    keywords: ["eacces", "permission", "permissions", "denied", "access", "sudo", "port"],
+  },
+
+  {
+    title: "ECONNREFUSED: Connection refused",
+    match: /econnrefused: connection refused|connection refused/i,
+    explanation:
+      "The target machine actively refused the connection. Usually means the service you are trying to reach isn't running on the specified port.",
+    causes: [
+      "The backend server is not running",
+      "The port number is incorrect",
+      "A firewall is blocking the connection",
+    ],
+    fixes: [
+      "Ensure the service you are calling is actually started",
+      "Double-check the host and port in your configuration",
+      "Verify that the service is listening on `0.0.0.0` or `127.0.0.1` as expected",
+    ],
+    keywords: ["connection", "refused", "econnrefused", "offline", "server", "port"],
   },
 
   // ─── React ────────────────────────────────────────────────────────────────

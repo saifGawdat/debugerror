@@ -49,18 +49,54 @@ function extractErrorLine(raw) {
 
 /**
  * Matches a cleaned error string against every pattern in the error database.
- * Returns the first matching entry, or null if nothing matches.
+ * Uses a scoring system:
+ * - Exact regex match: 100 points
+ * - Title match: 30 points per word
+ * - Keyword match: 20 points per word
  *
  * @param {string} errorLine - The cleaned, single-line error string.
  * @returns {object|null} The matching error object from ERROR_DB, or null.
  */
 function matchError(errorLine) {
+  const inputWords = errorLine
+    .toLowerCase()
+    .split(/[^a-z0-9]/)
+    .filter((w) => w.length > 2);
+
+  let bestMatch = null;
+  let highestScore = 0;
+
   for (const entry of ERROR_DB) {
+    let score = 0;
+
+    // 1. Regex Match
     if (entry.match.test(errorLine)) {
-      return entry;
+      score += 100;
+    }
+
+    const titleLower = entry.title.toLowerCase();
+    const titleWords = titleLower.split(/[^a-z0-9]/).filter((w) => w.length > 2);
+    const keywords = entry.keywords || [];
+
+    for (const word of inputWords) {
+      // 2. Title Match (check if any word in the title contains or is contained by the input word)
+      if (titleWords.some((tw) => tw.includes(word) || word.includes(tw))) {
+        score += 30;
+      }
+      // 3. Keyword Match
+      if (keywords.some((k) => k.toLowerCase() === word)) {
+        score += 20;
+      }
+    }
+
+    if (score > highestScore) {
+      highestScore = score;
+      bestMatch = entry;
     }
   }
-  return null;
+
+  // Threshold: 20 points (e.g. one keyword match)
+  return highestScore >= 20 ? bestMatch : null;
 }
 
 module.exports = { extractErrorLine, matchError };
