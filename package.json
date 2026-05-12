@@ -1,6 +1,6 @@
 {
   "name": "debugerror",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Explains common programming errors with causes and fixes — no internet required.",
   "main": "index.js",
   "bin": {

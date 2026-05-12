@@ -1137,6 +1137,421 @@ const ERROR_DB = [
     fixes: ["Use web workers", "Optimize code"],
     keywords: ["performance"],
   },
+
+  // ─── Validation (Zod / similar) ───────────────────────────────────────────
+
+  {
+    title: "Zod: Validation failed / invalid_type",
+    match: /zoderror|zod\.|validation failed.*zod|\[\s*zod\s*\]/i,
+    explanation:
+      "Zod rejected input because it did not match your schema (wrong type, missing field, string too short, etc.).",
+    causes: [
+      "Request body or props don't match the schema shape",
+      "Optional fields treated as required, or the opposite",
+      "Coercion off — e.g. string `'123'` passed where a number was expected",
+    ],
+    fixes: [
+      "Read `error.flatten()` or `error.errors` for field paths and messages",
+      "Align API/UI payloads with the schema (rename keys, add defaults)",
+      "Use `.safeParse()` and branch on `success` instead of throwing",
+      "Loosen or refine the schema with `.optional()`, `.nullable()`, or unions",
+    ],
+    keywords: ["zod", "validation", "schema", "invalid"],
+  },
+
+  // ─── npm / Yarn / pnpm ───────────────────────────────────────────────────
+
+  {
+    title: "npm: ERESOLVE unable to resolve dependency tree",
+    match: /eresolve unable to resolve dependency tree|peer dep.*conflict/i,
+    explanation:
+      "npm could not satisfy version constraints between your direct dependencies and their peers (or between nested packages).",
+    causes: [
+      "Two packages require incompatible versions of the same peer",
+      "Strict npm v7+ peer resolution vs older packages",
+    ],
+    fixes: [
+      "Run `npm install <pkg>@<version>` to pick a compatible set",
+      "Use `npm install --legacy-peer-deps` as a temporary workaround (know the risk)",
+      "Switch to overrides in package.json or use pnpm `overrides`",
+      "Upgrade the conflicting library to a version that supports your stack",
+    ],
+    keywords: ["eresolve", "npm", "peer", "dependency"],
+  },
+
+  {
+    title: "npm: EBADENGINE unsupported engine",
+    match: /ebadengine|unsupported engine/i,
+    explanation:
+      "The package declares a Node/npm version range that does not include your current runtime.",
+    causes: ["Node.js too old or too new for the package", "Wrong npm version"],
+    fixes: [
+      "Upgrade Node with nvm, fnm, or the official installer",
+      "Use `nvm install` / `nvm use` to match the project's `.nvmrc`",
+      "If safe, use `npm install --ignore-engines` (last resort)",
+    ],
+    keywords: ["ebadengine", "engine", "node"],
+  },
+
+  // ─── HTTP clients ─────────────────────────────────────────────────────────
+
+  {
+    title: "Axios: Network Error / connection failed",
+    match: /axioserror.*network|network error.*axios|econnaborted|timeout of \d+ms exceeded/i,
+    explanation:
+      "The HTTP client could not complete the request — no response, timeout, or TLS failure before headers arrived.",
+    causes: [
+      "Server down or wrong URL/port",
+      "CORS preflight blocked (browser shows as network error)",
+      "Request exceeded `timeout`",
+      "SSL certificate problems on HTTPS",
+    ],
+    fixes: [
+      "Verify the URL and that the API is reachable (`curl` the endpoint)",
+      "Increase `timeout` or add retries for flaky networks",
+      "In the browser, check DevTools Network for CORS or 4xx/5xx",
+      "Log `error.code` and `error.response` for Axios-specific details",
+    ],
+    keywords: ["axios", "network", "timeout", "econnaborted"],
+  },
+
+  {
+    title: "HTTP 429: Too Many Requests",
+    match: /429 too many requests|status code 429/i,
+    explanation:
+      "The server rate-limited you. Too many requests arrived in a short window.",
+    causes: [
+      "Retries or polling too aggressive",
+      "Shared API key hitting a quota",
+    ],
+    fixes: [
+      "Respect `Retry-After` header if present",
+      "Exponential backoff between retries",
+      "Reduce concurrency or cache responses",
+    ],
+    keywords: ["429", "rate", "limit", "too many"],
+  },
+
+  {
+    title: "HTTP 404: Not Found",
+    match: /404 not found|status code 404/i,
+    explanation:
+      "The server has no resource at the requested URL. The path or ID may be wrong.",
+    causes: [
+      "Typo in route or REST id",
+      "Resource deleted or never created",
+      "Wrong API base URL or environment",
+    ],
+    fixes: [
+      "Compare the request URL with server routes",
+      "Confirm IDs exist in the database",
+      "Check trailing slashes and API versioning (`/v1/` vs `/v2/`)",
+    ],
+    keywords: ["404", "not found"],
+  },
+
+  // ─── React (more) ────────────────────────────────────────────────────────
+
+  {
+    title: "React: Maximum update depth exceeded",
+    match: /maximum update depth exceeded/i,
+    explanation:
+      "React stopped an infinite loop of state updates — usually `setState` or a hook setter runs during render or in an effect with unstable dependencies.",
+    causes: [
+      "`useEffect(() => setX(...), [x])` where the effect always changes `x`",
+      "Calling a setter unconditionally in the component body",
+      "Child render triggers parent update which re-renders child again",
+    ],
+    fixes: [
+      "Fix effect dependencies so the effect does not fire every render",
+      "Only update state in response to user events or valid async completion",
+      "Split state so effects do not depend on values they themselves update",
+    ],
+    keywords: ["maximum", "update", "depth", "react"],
+  },
+
+  {
+    title: "React: Minified React error",
+    match: /minified react error #\d+/i,
+    explanation:
+      "Production React throws opaque error codes. The full message exists only in the development build.",
+    causes: ["Bug surfaced only in production bundle", "Invariant failed in prod"],
+    fixes: [
+      "Open https://react.dev/errors and look up the error number",
+      "Reproduce locally with `NODE_ENV=development` or `npm run dev`",
+      "Search the stack trace component names to find the offending code",
+    ],
+    keywords: ["minified", "react", "error"],
+  },
+
+  // ─── Testing (Jest / Vitest) ─────────────────────────────────────────────
+
+  {
+    title: "Testing Library: Unable to find element / role",
+    match: /testinglibraryelementerror|unable to find an accessible|unable to find element/i,
+    explanation:
+      "A query such as `getByRole`, `getByText`, or `findBy*` did not match any node in the DOM (or match was ambiguous).",
+    causes: [
+      "Text or role differs from what the component renders (whitespace, case, i18n)",
+      "Element inside a portal or shadow root not included in `container`",
+      "Async content not awaited — use `findBy*` or `waitFor`",
+    ],
+    fixes: [
+      "Use `screen.debug()` or `debug()` to print the current DOM",
+      "Prefer `findBy*` for elements that appear after async work",
+      "Check `hidden`, `name`, and `level` options for roles",
+      "Use `within(container)` if querying a subtree",
+    ],
+    keywords: ["testing", "library", "unable", "element", "role"],
+  },
+
+  {
+    title: "Jest / Vitest: Snapshot mismatch",
+    match: /snapshot.*mismatch|snapshot test failed/i,
+    explanation:
+      "Rendered output or serialized value no longer matches the stored snapshot.",
+    causes: ["Intentional UI change", "Non-deterministic output (dates, ids)"],
+    fixes: [
+      "If change is correct, update snapshots: `jest -u` / `vitest -u`",
+      "Mock `Date`, random ids, or i18n for stable snapshots",
+      "Remove snapshots for overly brittle full-page dumps",
+    ],
+    keywords: ["snapshot", "jest", "vitest"],
+  },
+
+  // ─── Node.js runtime ──────────────────────────────────────────────────────
+
+  {
+    title: "EMFILE: too many open files",
+    match: /emfile.*too many open files|too many open files/i,
+    explanation:
+      "The process hit the OS limit on concurrent file descriptors (often from many parallel file watchers or unclosed handles).",
+    causes: [
+      "Huge `node_modules` + default file watcher limit on macOS/Linux",
+      "Leaked file streams or sockets",
+    ],
+    fixes: [
+      "Raise ulimit: `ulimit -n 10240` (macOS/Linux)",
+      "Exclude folders in the watcher (e.g. watchOptions.ignored in webpack/vite)",
+      "Close streams explicitly or use `with` / `finally` patterns",
+    ],
+    keywords: ["emfile", "open", "files"],
+  },
+
+  {
+    title: "SSL / TLS: certificate verify failed",
+    match: /unable to verify the first certificate|certificate has expired|self signed certificate|ssl routines|UNABLE_TO_VERIFY_LEAF_SIGNATURE/i,
+    explanation:
+      "HTTPS handshake failed because the certificate chain could not be trusted or is expired.",
+    causes: [
+      "Corporate proxy replacing certs",
+      "Expired server cert",
+      "Local dev using self-signed HTTPS",
+    ],
+    fixes: [
+      "Fix the server certificate or install the correct CA bundle",
+      "For local dev only: `NODE_TLS_REJECT_UNAUTHORIZED=0` (never in production)",
+      "Point Node to a custom CA: `NODE_EXTRA_CA_CERTS=/path/to/ca.pem`",
+    ],
+    keywords: ["ssl", "tls", "certificate", "verify"],
+  },
+
+  {
+    title: "AggregateError: All promises were rejected",
+    match: /aggregateerror|all promises were rejected/i,
+    explanation:
+      "An API like `Promise.any` received only rejections, or multiple failures were grouped into one error.",
+    causes: [
+      "All parallel fetches failed",
+      "Every candidate in `Promise.any` rejected",
+    ],
+    fixes: [
+      "Inspect `error.errors` array for each underlying reason",
+      "Add logging inside each promise branch",
+      "Use `Promise.allSettled` to handle partial success",
+    ],
+    keywords: ["aggregate", "promises"],
+  },
+
+  // ─── Python (more) ───────────────────────────────────────────────────────
+
+  {
+    title: "Python: ModuleNotFoundError / ImportError",
+    match: /modulenotfounderror: no module named|importerror: cannot import name/i,
+    explanation:
+      "Python could not locate the package or symbol you tried to import.",
+    causes: [
+      "Package not installed in the active venv",
+      "Wrong working directory / PYTHONPATH",
+      "Circular import",
+    ],
+    fixes: [
+      "`pip install <package>` inside the correct environment",
+      "Activate the venv your IDE uses",
+      "Refactor to break circular imports (lazy import inside function)",
+    ],
+    keywords: ["modulenotfound", "import", "python"],
+  },
+
+  {
+    title: "Python: TypeError (wrong types)",
+    match: /typeerror: unsupported operand|typeerror: 'NoneType'/i,
+    explanation:
+      "An operation was applied to values whose types do not support it (e.g. `None + 1`, wrong argument types).",
+    causes: [
+      "Function returned `None` where a value was expected",
+      "Mixing str and int",
+    ],
+    fixes: [
+      "Add guards: `if x is not None:`",
+      "Validate inputs with types or pydantic",
+      "Read the full traceback line for the offending operator",
+    ],
+    keywords: ["typeerror", "python", "nonetype"],
+  },
+
+  {
+    title: "Python: RecursionError",
+    match: /recursionerror: maximum recursion depth exceeded/i,
+    explanation:
+      "A function called itself too deeply without reaching a base case (or recursion limit is too low for a valid deep recursion).",
+    causes: [
+      "Infinite recursion",
+      "Algorithm needs more depth than CPython default allows",
+    ],
+    fixes: [
+      "Fix base case or iteration",
+      "Rewrite as a loop",
+      "For rare cases: `sys.setrecursionlimit` (use carefully)",
+    ],
+    keywords: ["recursion", "python"],
+  },
+
+  // ─── SQL / Postgres / SQLite ───────────────────────────────────────────────
+
+  {
+    title: "PostgreSQL: relation does not exist",
+    match: /relation \".+\" does not exist|undefinedtable.*postgres/i,
+    explanation:
+      "A query referenced a table or view that is not in the connected database schema.",
+    causes: [
+      "Migration not applied",
+      "Wrong schema search_path",
+      "Typo in table name",
+    ],
+    fixes: [
+      "Run pending migrations",
+      "Qualify with schema: `public.users`",
+      "List tables: `\\dt` in psql",
+    ],
+    keywords: ["relation", "postgres", "does not exist"],
+  },
+
+  {
+    title: "SQLite: database is locked",
+    match: /sqlite.*database is locked|database is locked/i,
+    explanation:
+      "Another connection is holding a write lock longer than SQLite allows your operation to wait.",
+    causes: [
+      "Long-running write transaction",
+      "Multiple processes writing the same file",
+      "WAL mode misconfiguration",
+    ],
+    fixes: [
+      "Use a single writer connection or a pool with correct busy_timeout",
+      "Keep transactions short",
+      "Avoid opening many connections to the same DB file from one app",
+    ],
+    keywords: ["sqlite", "locked"],
+  },
+
+  // ─── Go ───────────────────────────────────────────────────────────────────
+
+  {
+    title: "Go: panic — nil pointer dereference",
+    match: /panic:.*nil pointer|runtime error: invalid memory address/i,
+    explanation:
+      "The program dereferenced a nil pointer or interface at runtime.",
+    causes: [
+      "Struct field or map value not initialised before use",
+      "Function returned nil without a guard",
+    ],
+    fixes: [
+      "Check the panic stack trace file:line",
+      "Add nil checks before use",
+      "Return zero values or errors instead of nil where appropriate",
+    ],
+    keywords: ["panic", "nil", "pointer", "go"],
+  },
+
+  // ─── Rust ─────────────────────────────────────────────────────────────────
+
+  {
+    title: "Rust: panic at runtime",
+    match: /thread '.+' panicked at|panic! at /i,
+    explanation:
+      "Rust aborted the thread because of an explicit `panic!` or an unrecoverable check (e.g. `unwrap` on `None`).",
+    causes: [
+      "`unwrap()` / `expect()` on Err or None",
+      "Assertion failed in debug",
+    ],
+    fixes: [
+      "Replace `unwrap` with `?` propagation or `match`",
+      "Read the panic location printed after `panicked at`",
+      "Use `RUST_BACKTRACE=1` for a full stack trace",
+    ],
+    keywords: ["panic", "rust", "thread"],
+  },
+
+  // ─── Bundlers / tooling ───────────────────────────────────────────────────
+
+  {
+    title: "PostCSS: Failed to find PostCSS config",
+    match: /failed to find postcss config|postcss config not found/i,
+    explanation:
+      "A tool expected a `postcss.config.js` (or similar) and did not find it.",
+    causes: ["Missing config after adding Tailwind/Autoprefixer", "Wrong cwd"],
+    fixes: [
+      "Add `postcss.config.js` at project root",
+      "Ensure the bundler's root matches where the config lives",
+    ],
+    keywords: ["postcss", "config"],
+  },
+
+  {
+    title: "ESLint: Parsing error: Unexpected token",
+    match: /eslint.*parsing error|parsing error.*eslint/i,
+    explanation:
+      "ESLint's parser could not understand the file — often a parser mismatch for TypeScript or modern syntax.",
+    causes: [
+      "Missing `@typescript-eslint/parser` for .ts/.tsx",
+      "Parser options out of sync with your TS/JS version",
+    ],
+    fixes: [
+      "Set `parser: '@typescript-eslint/parser'` in eslint config for TS files",
+      "Align `parserOptions.ecmaVersion` and `project` with tsconfig",
+    ],
+    keywords: ["eslint", "parsing"],
+  },
+
+  // ─── Browser storage ─────────────────────────────────────────────────────
+
+  {
+    title: "QuotaExceededError: localStorage quota",
+    match: /quotaexceedederror|exceeded the quota/i,
+    explanation:
+      "The browser refused to store more data in `localStorage` or `sessionStorage` (per-origin limit, often ~5MB).",
+    causes: [
+      "Storing large blobs or logs in localStorage",
+      "Never clearing old keys",
+    ],
+    fixes: [
+      "Store large assets in IndexedDB instead",
+      "Prune keys or compress payloads",
+      "Catch `QuotaExceededError` and degrade gracefully",
+    ],
+    keywords: ["quota", "localstorage", "storage"],
+  },
 ];
 
 module.exports = ERROR_DB;
