@@ -1314,7 +1314,7 @@ const ERROR_DB = [
     fixes: [
       "If change is correct, update snapshots: `jest -u` / `vitest -u`",
       "Mock `Date`, random ids, or i18n for stable snapshots",
-      "Remove snapshots for overly brittle full-page dumps",
+      "Remove snapshots for overly brittle full-page dumps.",
     ],
     keywords: ["snapshot", "jest", "vitest"],
   },
